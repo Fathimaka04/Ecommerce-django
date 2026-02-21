@@ -66,9 +66,9 @@
                 </a>
 
                 <!-- Search -->
-                <form action="#" class="flex-grow-1">
+                <form action="{% url 'search' %}" class="flex-grow-1" method="GET">
                     <div class="input-group">
-                        <input type="text" class="form-control" placeholder="Search products">
+                        <input type="text" class="form-control" placeholder="Search products" name="keyword">
                         <button class="btn btn-primary" type="submit">
                             <i class="fa fa-search"></i>
                         </button>
@@ -85,10 +85,10 @@
                     <a href="#">Register</a>
                 </div>
 
-                <a href="#" class="position-relative">
+                <a href="{%url 'cart' %}" class="position-relative">
                     <i class="fa fa-shopping-cart fa-2x"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                        0
+                        {{cart_count}}
                     </span>
                 </a>
             </div>
