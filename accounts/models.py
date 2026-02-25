@@ -56,7 +56,7 @@ class account(AbstractBaseUser):
 
     USERNAME_FIELD='email' #setting username in login as email
     REQUIRED_FIELDS=['username','first_name','last_name']
-    object=MyAccountManager()
+    objects=MyAccountManager()
     def __str__(self):
         return self.email
     

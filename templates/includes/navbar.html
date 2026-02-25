@@ -79,12 +79,20 @@
 
             <!-- RIGHT SIDE -->
             <div class="col-lg-3 d-flex justify-content-end align-items-center">
+                {% if user.id is  None %}
                 <div class="me-3 text-end">
                     <small class="text-muted">Welcome guest!</small><br>
-                    <a href="#">Sign in</a> |
-                    <a href="#">Register</a>
+                    <a href="{% url 'login' %}">Sign in</a> |
+                    <a href="{% url 'register' %}">Register</a>
+                </div>
+                {% else %}
+                    <div class="me-3 text-end">
+                    <small class="text-muted">Welcome {{user.first_name}}</small><br>
+                    <a href="{% url 'dashboard' %}">Dashboard</a> |
+                    <a href="{% url 'logout' %}">Logout</a>
                 </div>
 
+                {% endif %}
                 <a href="{%url 'cart' %}" class="position-relative">
                     <i class="fa fa-shopping-cart fa-2x"></i>
                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
