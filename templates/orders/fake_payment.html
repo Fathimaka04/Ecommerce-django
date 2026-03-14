@@ -1,0 +1,270 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* Animated Credit Card Preview - minimal custom CSS needed */
+    .credit-card-preview {
+        width: 100%;
+        max-width: 380px;
+        height: 220px;
+        margin: 0 auto;
+        border-radius: 16px;
+        padding: 25px 30px;
+        position: relative;
+        overflow: hidden;
+        color: #fff;
+        font-family: 'Consolas', 'Courier New', monospace;
+        background: linear-gradient(135deg, #0d6efd, #0d6efd);
+        background-size: 200% 200%;
+        animation: gradientShift 4s ease infinite;
+        transition: transform 0.3s ease;                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+    }
+    .credit-card-preview:hover {
+        transform: scale(1.02);
+    }
+    @keyframes gradientShift {
+        0% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+        100% { background-position: 0% 50%; }
+    }
+    .card-chip {
+        width: 48px;
+        height: 36px;
+        background: linear-gradient(135deg, #f0c27f, #e2b04a);
+        border-radius: 6px;
+        margin-bottom: 22px;
+    }
+    .card-number-display {
+        font-size: 22px;
+        letter-spacing: 3px;
+        text-shadow: 0 1px 3px rgb(8, 8, 15);
+        margin-bottom: 18px;
+    }
+    .card-bottom {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+    }
+    .card-name-display {
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        opacity: 0.9;
+    }
+    .card-expiry-display {
+        font-size: 13px;
+        text-align: right;
+    }
+    .card-expiry-display .exp-label {
+        font-size: 9px;
+        opacity: 0.7;
+        letter-spacing: 1px;
+        display: block;
+        margin-bottom: 2px;
+    }
+</style>
+
+<section class="section-content padding-y bg">
+<div class="container">
+
+<div class="row">
+    <!-- Left Column: Card Preview + Form -->
+    <aside class="col-lg-7 mb-4">
+
+        <!-- Animated Card Preview -->
+        <div class="mb-4" style="perspective: 1000px;">
+            <div class="credit-card-preview shadow-lg" id="cardPreview">
+                <div class="card-chip"></div>
+                <div class="card-number-display" id="cardNumberDisplay">
+                    •••• •••• •••• ••••
+                </div>
+                <div class="card-bottom">
+                    <div class="card-name-display" id="cardNameDisplay">
+                        YOUR NAME
+                    </div>
+                    <div class="card-expiry-display">
+                        <span class="exp-label">EXPIRES</span>
+                        <span id="cardExpiryDisplay">MM/YY</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Messages -->
+        {% if errors %}
+        <div class="alert alert-danger">
+            <ul class="mb-0">
+                {% for error in errors %}
+                <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
+        <!-- Payment Form Card -->
+        <div class="card">
+            <h5 class="card-header bg-primary text-white">
+                <i class="fa fa-credit-card"></i> Card Details
+                <span class="badge bg-warning text-dark float-end">⚡ TEST MODE</span>
+            </h5>
+            <div class="card-body">
+                <form method="POST" action="{% url 'fake_payment' order.order_number %}" id="paymentForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fa fa-credit-card text-primary me-1"></i> Card Number</label>
+                        <input type="text" name="card_number" id="cardNumber" class="form-control"
+                               placeholder="1234 5678 9012 3456" maxlength="19" required
+                               autocomplete="off">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label"><i class="fa fa-user text-primary me-1"></i> Card Holder Name</label>
+                        <input type="text" name="card_name" id="cardName" class="form-control"
+                               placeholder="John Doe" required autocomplete="off">
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label"><i class="fa fa-calendar text-primary me-1"></i> Expiry Date</label>
+                            <input type="text" name="expiry" id="cardExpiry" class="form-control"
+                                   placeholder="MM/YY" maxlength="5" required autocomplete="off">
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label"><i class="fa fa-shield text-primary me-1"></i> CVV</label>
+                            <input type="password" name="cvv" id="cardCvv" class="form-control"
+                                   placeholder="•••" maxlength="4" required autocomplete="off">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary btn-block w-100 mt-2">
+                        <i class="fa fa-lock"></i> Pay ${{ grand_total }} Now
+                    </button>
+                </form>
+
+                <div class="text-center mt-3 p-2 bg-light rounded">
+                    <i class="fa fa-shield text-success"></i>
+                    <small class="text-muted">This is a <strong>fake/test</strong> payment gateway. No real charges will be made.</small>
+                </div>
+            </div>
+        </div>
+
+    </aside>
+
+    <!-- Right Column: Order Summary -->
+    <aside class="col-lg-5">
+        <div class="card">
+            <h5 class="card-header bg-blue text-white">
+                <i class="fa fa-shopping-bag"></i> Order Summary
+            </h5>
+            <div class="card-body">
+                <table class="table table-borderless table-shopping-cart">
+                    <tbody>
+                        {% for cart_item in cart_items %}
+                        <tr>
+                            <td>
+                                <figure class="itemside align-items-center">
+                                    <div class="aside"><img src="{{ cart_item.product.image.url }}" class="img-sm" style="width:50px; height:50px; object-fit:cover; border-radius:8px;"></div>
+                                    <figcaption class="info">
+                                        <a class="title text-dark">{{ cart_item.product.product_name }}</a>
+                                        <p class="text-muted small mb-0">Qty: {{ cart_item.quantity }}</p>
+                                    </figcaption>
+                                </figure>
+                            </td>
+                            <td>
+                                <div class="price-wrap">
+                                    <var class="price">${{ cart_item.sub_total }}</var>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <hr>
+
+                <dl class="dlist-align">
+                    <dt>Subtotal:</dt>
+                    <dd class="text-right">${{ total }}</dd>
+                </dl>
+                <dl class="dlist-align">
+                    <dt>Tax (2%):</dt>
+                    <dd class="text-right">${{ tax }}</dd>
+                </dl>
+                <dl class="dlist-align">
+                    <dt>Grand Total:</dt>
+                    <dd class="text-right text-dark b"><strong>${{ grand_total }}</strong></dd>
+                </dl>
+
+                <hr>
+
+                <!-- Billing Address -->
+                <p class="mb-1"><strong><i class="fa fa-map-marker text-primary me-1"></i> Billing Address</strong></p>
+                <p class="text-muted small mb-0" style="line-height: 1.7;">
+                    {{ order.full_name }}<br>
+                    {{ order.full_address }}<br>
+                    {{ order.city }}, {{ order.state }}<br>
+                    {{ order.country }}<br>
+                    {{ order.phone }}
+                </p>
+            </div>
+        </div>
+    </aside>
+</div>
+
+</div>
+</section>
+
+<script>
+    // --- Live Card Preview ---
+    const cardNumberInput = document.getElementById('cardNumber');
+    const cardNameInput = document.getElementById('cardName');
+    const cardExpiryInput = document.getElementById('cardExpiry');
+
+    const cardNumberDisplay = document.getElementById('cardNumberDisplay');
+    const cardNameDisplay = document.getElementById('cardNameDisplay');
+    const cardExpiryDisplay = document.getElementById('cardExpiryDisplay');
+
+    // Format card number with spaces
+    cardNumberInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        let formatted = value.replace(/(.{4})/g, '$1 ').trim();
+        e.target.value = formatted;
+
+        if (value.length > 0) {
+            let display = '';
+            for (let i = 0; i < 16; i++) {
+                if (i > 0 && i % 4 === 0) display += ' ';
+                display += i < value.length ? value[i] : '•';
+            }
+            cardNumberDisplay.textContent = display;
+        } else {
+            cardNumberDisplay.textContent = '•••• •••• •••• ••••';
+        }
+    });
+
+    // Update cardholder name
+    cardNameInput.addEventListener('input', function(e) {
+        let value = e.target.value.trim();
+        cardNameDisplay.textContent = value.length > 0 ? value.toUpperCase() : 'YOUR NAME';
+    });
+
+    // Format expiry with auto-slash
+    cardExpiryInput.addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+        if (value.length >= 2) {
+            value = value.substring(0, 2) + '/' + value.substring(2);
+        }
+        e.target.value = value;
+        cardExpiryDisplay.textContent = value.length > 0 ? value : 'MM/YY';
+    });
+
+    // Only allow digits for CVV
+    document.getElementById('cardCvv').addEventListener('input', function(e) {
+        e.target.value = e.target.value.replace(/\D/g, '');
+    });
+</script>
+
+{% endblock %}

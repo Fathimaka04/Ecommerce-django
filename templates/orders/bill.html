@@ -1,0 +1,413 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<style>
+    /* ===== Bill / Receipt Styles ===== */
+    .bill-section {
+        padding: 40px 0 60px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 80vh;
+    }
+
+    .bill-container {
+        max-width: 750px;
+        margin: 0 auto;
+        background: #fff;
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+
+    /* Success Header */
+    .bill-header {
+        background: linear-gradient(135deg, #1b9d65, #1b9d65);
+        padding: 35px 40px;
+        text-align: center;
+        color: #fff;
+    }
+
+    .bill-header .success-icon {
+        width: 70px;
+        height: 70px;
+        background: rgba(255,255,255,0.25);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        font-size: 34px;
+        animation: popIn 0.6s ease;
+    }
+
+    @keyframes popIn {
+        0% { transform: scale(0); }
+        60% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    .bill-header h2 {
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 5px;
+    }
+
+    .bill-header p {
+        font-size: 14px;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    /* Bill Body */
+    .bill-body {
+        padding: 35px 40px;
+    }
+
+    /* Order Meta Row */
+    .order-meta {
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 15px;
+        padding-bottom: 25px;
+        border-bottom: 2px dashed #e8e8e8;
+        margin-bottom: 25px;
+    }
+
+    .order-meta-item {
+        text-align: center;
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .order-meta-item .label {
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #b2bec3;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    .order-meta-item .value {
+        font-size: 15px;
+        font-weight: 700;
+        color: #2d3436;
+    }
+
+    .order-meta-item .value.text-success {
+        color: #1b9d65 !important;
+    }
+
+    /* Items Table */
+    .bill-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 25px;
+    }
+
+    .bill-table thead th {
+        background: #f8f9fa;
+        padding: 12px 16px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #636e72;
+        font-weight: 700;
+        border-bottom: 2px solid #e8e8e8;
+    }
+
+    .bill-table tbody td {
+        padding: 14px 16px;
+        font-size: 14px;
+        color: #2d3436;
+        border-bottom: 1px solid #f1f1f1;
+        vertical-align: middle;
+    }
+
+    .bill-table .product-cell {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .bill-table .product-cell img {
+        width: 45px;
+        height: 45px;
+        border-radius: 8px;
+        object-fit: cover;
+    }
+
+    .bill-table .product-cell .product-name {
+        font-weight: 600;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    .bill-table .product-cell .product-variation {
+        font-size: 12px;
+        color: #b2bec3;
+        margin: 0;
+    }
+
+    .bill-table .text-right {
+        text-align: right;
+    }
+
+    /* Totals Section */
+    .bill-totals {
+        border-top: 2px dashed #e8e8e8;
+        padding-top: 20px;
+    }
+
+    .bill-totals-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        font-size: 14px;
+        color: #636e72;
+    }
+
+    .bill-totals-row.grand-total {
+        font-size: 20px;
+        font-weight: 800;
+        color: #2d3436;
+        border-top: 2px solid #0d6efd;
+        margin-top: 10px;
+        padding-top: 15px;
+    }
+
+    .bill-totals-row.grand-total .amount {
+        color: #0d6efd;
+    }
+
+    /* Billing Address Section */
+    .bill-address {
+        margin-top: 30px;
+        padding-top: 25px;
+        border-top: 2px dashed #e8e8e8;
+    }
+
+    .bill-address h6 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: #b2bec3;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .bill-address p {
+        font-size: 14px;
+        color: #636e72;
+        line-height: 1.7;
+        margin: 0;
+    }
+
+    /* Footer / Actions */
+    .bill-footer {
+        padding: 25px 40px;
+        background: #f8f9fa;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .btn-print {
+        padding: 12px 30px;
+        background: linear-gradient(135deg, #0d6efd, #0d6efd);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-print:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(22, 3, 164, 0.4);
+    }
+
+    .btn-print i {
+        margin-right: 8px;
+    }
+
+    .btn-continue {
+        padding: 12px 30px;
+        background: transparent;
+        color: #0d6efd;
+        border: 2px solid #0d6efd;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+
+    .btn-continue:hover {
+        background: #0d6efd;
+        color: white;
+    }
+
+    .bill-thanks {
+        text-align: center;
+        padding: 20px 40px 0;
+        font-size: 13px;
+        color: #b2bec3;
+    }
+
+    /* Print Styles */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+
+        .bill-container, .bill-container * {
+            visibility: visible;
+        }
+
+        .bill-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none;
+            border-radius: 0;
+        }
+
+        .bill-footer {
+            display: none !important;
+        }
+
+        .bill-section {
+            background: none !important;
+            padding: 0;
+        }
+    }
+</style>
+
+<section class="bill-section">
+<div class="container">
+    <div class="bill-container">
+
+        <!-- Success Header -->
+        <div class="bill-header">
+            <div class="success-icon">
+                <i class="fa fa-check"></i>
+            </div>
+            <h2>Payment Successful!</h2>
+            <p>Your order has been placed successfully. Here's your receipt.</p>
+        </div>
+
+        <!-- Bill Body -->
+        <div class="bill-body">
+
+            <!-- Order Meta -->
+            <div class="order-meta">
+                <div class="order-meta-item">
+                    <span class="label">Order Number</span>
+                    <span class="value">#{{ order.order_number }}</span>
+                </div>
+                <div class="order-meta-item">
+                    <span class="label">Date</span>
+                    <span class="value">{{ order.created_at|date:"M d, Y" }}</span>
+                </div>
+                <div class="order-meta-item">
+                    <span class="label">Payment ID</span>
+                    <span class="value">{{ payment.payment_id }}</span>
+                </div>
+                <div class="order-meta-item">
+                    <span class="label">Status</span>
+                    <span class="value text-success">{{ payment.status }}</span>
+                </div>
+            </div>
+
+            <!-- Items Table -->
+            <table class="bill-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th class="text-right">Qty</th>
+                        <th class="text-right">Price</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for op in order_products %}
+                    <tr>
+                        <td>
+                            <div class="product-cell">
+                                <img src="{{ op.product.image.url }}" alt="{{ op.product.product_name }}">
+                                <div>
+                                    <p class="product-name">{{ op.product.product_name }}</p>
+                                    {% if op.color and op.color != 'N/A' %}
+                                    <p class="product-variation">Color: {{ op.color }}</p>
+                                    {% endif %}
+                                    {% if op.size and op.size != 'N/A' %}
+                                    <p class="product-variation">Size: {{ op.size }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td class="text-right">{{ op.quantity }}</td>
+                        <td class="text-right">${{ op.product_price }}</td>
+                        <td class="text-right"><strong>${{ op.product_price }}</strong></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Totals -->
+            <div class="bill-totals">
+                <div class="bill-totals-row">
+                    <span>Subtotal</span>
+                    <span>${{ subtotal }}</span>
+                </div>
+                <div class="bill-totals-row">
+                    <span>Tax (2%)</span>
+                    <span>${{ order.tax }}</span>
+                </div>
+                <div class="bill-totals-row grand-total">
+                    <span>Grand Total</span>
+                    <span class="amount">${{ order.order_total }}</span>
+                </div>
+            </div>
+
+            <!-- Billing Address -->
+            <div class="bill-address">
+                <h6><i class="fa fa-map-marker" style="margin-right: 6px;"></i> Billing Address</h6>
+                <p>
+                    {{ order.full_name }}<br>
+                    {{ order.full_address }}<br>
+                    {{ order.city }}, {{ order.state }}<br>
+                    {{ order.country }}<br>
+                    {{ order.email }} | {{ order.phone }}
+                </p>
+            </div>
+        </div>
+
+        <!-- Thank You -->
+        <p class="bill-thanks">Thank you for shopping with ShopEase! 🎉</p>
+
+        <!-- Footer Actions -->
+        <div class="bill-footer">
+            <a href="{% url 'store' %}" class="btn-continue">
+                <i class="fa fa-arrow-left"></i> Continue Shopping
+            </a>
+            <button class="btn-print" onclick="window.print()">
+                <i class="fa fa-print"></i> Print Bill
+            </button>
+        </div>
+
+    </div>
+</div>
+</section>
+
+{% endblock %}
