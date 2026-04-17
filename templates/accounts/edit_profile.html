@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 
 <!-- ========================= SECTION CONTENT ========================= -->
@@ -19,7 +19,7 @@
 				{% if userprofile.profile_picture %}
     <img src="{{ userprofile.profile_picture.url }}" width="100" style="border-radius:50px;">
 {% else %}
-    <img src="/media/default/images.jpg" width="100" style="border-radius:50px;">
+    <img src="{%static 'images/def.jpg' %}" width="100" style="border-radius:50px;">
 {% endif %}
 			</div>
 			<div class="row"> 

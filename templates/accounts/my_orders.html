@@ -22,7 +22,7 @@
 					<table class="table table-hover">
   <thead>
     <tr>
-      <th scope="col">Order #</th>
+      <th scope="col">Order </th>
       <th scope="col">Billing Name </th>
       <th scope="col">Phone Number</th>
       <th scope="col">Order Total</th>
@@ -38,6 +38,7 @@
       <td>${{order.order_total}}</td>
 	  <td>{{order.created_at}}</td>
     </tr>
+	{% endfor%}
     
  
   </tbody>

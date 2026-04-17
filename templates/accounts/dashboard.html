@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
 
 <!-- ========================= SECTION CONTENT ========================= -->
@@ -29,7 +29,11 @@
 				<div class="col-md-6">
 					<div class="card" style="text-align:center;">
 						<div class="card-body">
-							<img src="{{userprofile.profile_picture.url}}" alt="User Profile Picture" width="50" height="50" style="border-radius: 50%;">
+							{% if userprofile.profile_picture %}
+    						<img src="{{ userprofile.profile_picture.url }}" alt="User Profile Picture" width="50" height="50" style="border-radius: 50%;">
+							{% else %}
+   							<img src="{% static 'images/def.jpg' %}" alt="Default Profile" width="50" height="50" style="border-radius: 50%;">
+							{% endif %}
 							<p>{{user.email}}</p>
 							<p>{{user.phone_number}}</p>
 						</div>
